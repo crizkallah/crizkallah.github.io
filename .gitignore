@@ -1,0 +1,11 @@
+*.aux
+*.fdb*
+*.fls
+*.log
+*.pdf
+*.synctex*
+*~
+*.DS_Store
+*/.DS_Store
+*.zip
+*.tar*
