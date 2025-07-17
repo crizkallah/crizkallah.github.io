@@ -17,13 +17,13 @@ published in the following paper:
 *)
 
 
-(* An assignment is a function, taking an agent as an argument, output the allocation,
-which is the fractions/proportions of each alternatives assigned to that agent *)
+(* An assignment is a function, taking an agent as an argument, and outputting the allocation,
+which is the fractions/proportions of each alternative assigned to that agent *)
 type_synonym 'alt allocation = "'alt \<Rightarrow> real"
 type_synonym ('agent, 'alt) assignment = "'agent \<Rightarrow> 'alt allocation"
                                 
 
-(* Definition, fractional assignment, Preliminaries section *)
+(* Definition, fractional assignment *)
 locale random_allocation = 
   fixes alts :: "'b set"
   fixes h :: "'b allocation"
@@ -66,7 +66,7 @@ definition sum_utility :: "('a \<Rightarrow> real) \<Rightarrow> 'a set \<Righta
 where 
   "sum_utility u A p = (\<Sum>i \<in> A. (u i) * (p i))"
 
-(* Definition, discrete assignment, Preliminaries section *)
+(* Definition, discrete assignment *)
 locale discrete_allocation = random_allocation + 
   assumes disc: "\<forall>i \<in> alts. h i = 0 \<or> h i = 1"
 begin
@@ -123,7 +123,7 @@ begin
 lemma zeros: "\<forall>j \<in> alts. p i j = 0 \<longleftrightarrow> j \<notin> (allocated_alts (p i) alts)"
   by (simp add: allocated_alts_def)
 
-lemma  ones: "\<forall>j \<in> alts. p i j = 1 \<longleftrightarrow> j \<in> (allocated_alts (p i) alts)"
+lemma ones: "\<forall>j \<in> alts. p i j = 1 \<longleftrightarrow> j \<in> (allocated_alts (p i) alts)"
   using discr zeros allocated_alts_def discrete_allocation.disc by fastforce
 end
 
@@ -184,7 +184,7 @@ proof -
 qed
 
 
-(* Definition, responsive set extension, Preliminaries section *)
+(* Definition, Responsive Set Extension *)
 definition
   RS :: "'alt relation \<Rightarrow> 'alt set relation" 
 where
@@ -1797,79 +1797,7 @@ proof (rule)
   qed
 qed
 
-(*
-  show "\<exists>P. (\<forall>s1 s2. RS R s1 s2 \<longrightarrow> P s1 s2) \<and> P (allocated_alts p alts) (allocated_alts q alts) \<Longrightarrow> \<not> q \<prec>[SDA R] p" nitpick
-*)
-
-
 end
-(*
-consts alt\<^sub>1 :: 'alt
-consts alt\<^sub>2 :: 'alt
-definition alts :: "'alt set" where 
-  "alts = {alt\<^sub>1, alt\<^sub>2}"
-definition R :: "'alt relation" where
-  "R = (\<lambda>x y. if x \<notin> alts \<or> y \<notin> alts then False else (if y = alt\<^sub>2 then False else True ))"
-definition P :: "'alt set relation" where
-  "P = (\<lambda>x y. True)"
-*)
-(*
-theorem not_RS_not_strict_SDA:
-  "\<exists>alts p q R.
-   discrete_pair_allocation alts p q R \<and>
-   \<not> ((\<exists>P. (\<forall>s1 s2. RS R s1 s2 \<longrightarrow> P s1 s2) \<and> P (allocated_alts p alts) (allocated_alts q alts)) \<longrightarrow>
-    \<not> q \<prec>[SDA R] p)"
-proof (rule, rule, rule, rule)
-(*
-R = (\<lambda>x. _)(alt\<^sub>1 := (\<lambda>x. _)(alt\<^sub>1 := True, alt\<^sub>2 := False), alt\<^sub>2 := (\<lambda>x. _)(alt\<^sub>1 := True, alt\<^sub>2 := True))
-    alts = {alt\<^sub>1, alt\<^sub>2}
-    p = (\<lambda>x. _)(alt\<^sub>1 := 1, alt\<^sub>2 := 0)
-    q = (\<lambda>x. _)(alt\<^sub>1 := 0, alt\<^sub>2 := 1)
-  Skolem constants:
-    P = (\<lambda>x. _)
-        ({} := (\<lambda>x. _)({} := True, {alt\<^sub>1} := True, {alt\<^sub>1, alt\<^sub>2} := True, {alt\<^sub>2} := True),
-         {alt\<^sub>1} := (\<lambda>x. _)({} := True, {alt\<^sub>1} := True, {alt\<^sub>1, alt\<^sub>2} := True, {alt\<^sub>2} := True),
-         {alt\<^sub>1, alt\<^sub>2} := (\<lambda>x. _)({} := True, {alt\<^sub>1} := True, {alt\<^sub>1, alt\<^sub>2} := True, {alt\<^sub>2} := True),
-         {alt\<^sub>2} := (\<lambda>x. _)({} := True, {alt\<^sub>1} := True, {alt\<^sub>1, alt\<^sub>2} := True, {alt\<^sub>2} := True))
-*)
-(*
-  define alts :: "'alt set" where "alts = {alt\<^sub>1, alt\<^sub>2}"
-  define p :: "'alt allocation" where "p = (\<lambda>x. if x = alt\<^sub>1 then 1 else 0)"
-  define q :: "'alt allocation" where "q = (\<lambda>x. if x = alt\<^sub>2 then 1 else 0)"
-  define R :: "'alt relation" where "R = (\<lambda>x y. if x \<notin> alts \<or> y \<notin> alts then False else (if y = alt\<^sub>2 then False else True ))"
-  define P :: "'alt set relation" where "P = (\<lambda>x y. True)"
-*)
-  have "discrete_pair_allocation alts p q R"
-  proof (unfold discrete_pair_allocation_def)
-    have "alts \<noteq> {}" by (simp add: alts_def)
-    have "sum p alts = sum q alts" unfolding alts_def q_def p_def by simp
-    have "discrete_allocation alts p" 
-      unfolding alts_def p_def discrete_allocation_def discrete_allocation_axioms_def random_allocation_def
-      by simp
-    have "discrete_allocation alts q" 
-      unfolding alts_def q_def discrete_allocation_def discrete_allocation_axioms_def random_allocation_def
-      by simp
-    have "finite_total_preorder_on alts R"
-    proof (unfold finite_total_preorder_on_def finite_total_preorder_on_axioms_def)
-      have "finite alts" unfolding alts_def by auto
-      have "total_preorder_on alts R"
-      proof (unfold total_preorder_on_def total_preorder_on_axioms_def)
-        have "(\<forall>x y. x \<in> alts \<longrightarrow> y \<in> alts \<longrightarrow> R x y \<or> R y x)"
-          unfolding alts_def R_def nitpick
-    qed
-      
-  qed
-
-
-qed
-*)
-
-
-
-
-
-
-
 
 
 context random_assignment
@@ -1939,7 +1867,9 @@ proof -
   from this show "sum ?P alts = real (card alts) / real (card agents)" by auto
 qed
 
-
+(* The positions mentioned here are the positions of those fairness definitions in the original paper, 
+   for reference.
+ *)
 (*** Proportionality ***)
 
 (* SD proportionality - Section 4 Proportionality, (ii) (a) *)
@@ -2077,7 +2007,7 @@ lemma gen_two_random_alloc: "\<forall>k i j. ((k \<in> agents) \<and> (i \<in> a
   by (auto simp add: two_random_alloc)
 
 (* Equivalences, random *)
-(* Theorem 2 (i) *)
+(* Equivalence (1) *)
 theorem weak_possible_prop: "possible_proportional p = weak_SD_proportional p"
 proof (unfold possible_proportional_def weak_SD_proportional_def)
   let "?P" = "pmf_like_set alts"
@@ -2099,7 +2029,7 @@ proof (unfold possible_proportional_def weak_SD_proportional_def)
     by auto
 qed
   
-(* Theorem 2 (ii) *)
+(* Equivalence (2) *)
 theorem SD_necessary_prop: "SD_proportional p = necessary_proportional p"
 proof (unfold SD_proportional_def necessary_proportional_def)
   let "?P" = "pmf_like_set alts"
@@ -2122,7 +2052,7 @@ proof (unfold SD_proportional_def necessary_proportional_def)
 qed
 
 
-(* Theorem 2 (iv) first equivalence *)
+(* Equivalence (4) first equivalence *)
 theorem SD_necessary_envy: "SD_envyfree p = necessary_envyfree p"
 proof (unfold SD_envyfree_def necessary_envyfree_def)
   have "\<forall>i \<in> agents. \<forall>j \<in> agents. SDA (R i) (p j) (p i) = (\<forall>u. vnm_utility alts (R i) u \<longrightarrow> sum_utility u alts (p j) \<le> sum_utility u alts (p i))"
@@ -2142,7 +2072,7 @@ proof (unfold SD_envyfree_def necessary_envyfree_def)
 qed
 
 (* Implications, random *)
-(* Theorem 3 (i) *)
+(* Implication (5) *)
 theorem SD_envy_imp_SD_prop: "SD_envyfree p \<Longrightarrow> SD_proportional p"
 proof -
   assume "SD_envyfree p"
@@ -2182,7 +2112,7 @@ proof -
     by auto
 qed
 
-(* Theorem 3 (ii) *)
+(* Implication (6) *)
 theorem SD_imp_weak_SD_prop: "SD_proportional p \<Longrightarrow> weak_SD_proportional p"
 proof (unfold SD_proportional_def weak_SD_proportional_def, rule)
   fix i
@@ -2193,7 +2123,7 @@ proof (unfold SD_proportional_def weak_SD_proportional_def, rule)
     by auto
 qed
 
-(* Theorem 3 (iii) *)
+(* Implication (7) *)
 theorem poss_envy_imp_weak_SD_prop: "possible_envyfree p \<Longrightarrow> weak_SD_proportional p"
 proof -
   assume "possible_envyfree p"
@@ -2246,7 +2176,7 @@ proof -
   from this weak_possible_prop show "weak_SD_proportional p" by auto
 qed
 
-(* Theorem 3 (iv) *)
+(* Implication (8) *)
 theorem poss_envy_imp_weak_SD_envy: "possible_envyfree p \<Longrightarrow> weak_SD_envyfree p"
 proof (unfold weak_SD_envyfree_def possible_envyfree_def)
   {
@@ -2307,7 +2237,8 @@ proof -
     by (auto simp add: gen_one_discrete_alloc discr iagent jagent)
 qed
 
-(* Theorem 2 (iv), second equivalence *)
+(* Equivalence, discrete *)
+(* Equivalence (4), second equivalence *)
 theorem SD_compl: "SD_envyfree p = necessary_completion_envyfree p"
 proof (unfold SD_envyfree_def necessary_completion_envyfree_def)
   {
@@ -2365,7 +2296,8 @@ proof (unfold SD_envyfree_def necessary_completion_envyfree_def)
     by blast
 qed
 
-(* Theorem 2 (iii) *)
+(* Implication, discrete *)
+(* Implication (3a) - modified from Equivalence (3) *)
 theorem weak_possible_compl_envy: "weak_SD_envyfree p \<Longrightarrow> possible_completion_envyfree p"
 proof (unfold weak_SD_envyfree_def possible_completion_envyfree_def)
   {
@@ -2425,7 +2357,7 @@ qed
 
 (* 
   Demonstration that the definition of necessary completion envyfree and possible completion envyfree
-  are actually trivially equivalent when the definition uses biimplication to define "consistent with
+  are actually equivalent when the definition uses biimplication to define "consistent with
   the responsive set extension"
 *)
 lemma exist_one_relation: "\<forall>i \<in> agents. \<exists>!P. (\<forall>s1 s2. (RS (R i)) s1 s2 \<longleftrightarrow> P s1 s2)" 
