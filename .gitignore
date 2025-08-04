@@ -2,7 +2,6 @@
 *.fdb*
 *.fls
 *.log
-*.pdf
 *.synctex*
 *~
 *.DS_Store
